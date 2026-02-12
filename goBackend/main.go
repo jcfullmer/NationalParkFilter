@@ -15,7 +15,7 @@ func main() {
 	}
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("PUT /", handlerRoot)
+	mux.HandleFunc("GET  /", HandlerRoot)
 
 	log.Printf("Listening on port %s", conf.Port)
 	err := http.ListenAndServe(conf.Port, mux)
