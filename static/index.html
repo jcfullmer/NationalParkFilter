@@ -44,7 +44,7 @@
             const limit = document.getElementById('limitInput').value.trim();
             const resultsDiv = document.getElementById('results');
             const infoDiv = document.getElementById('results-info');
-            let url = state ? `/park/state?state_code=${state}` : `/park/`;
+            let url = state ? `/park/state?state_code=${state}` : `/park`;
             if (limit) {
                 const separator = url.includes('?') ? '&' : '?';
                 url += `${separator}limit=${limit}`;

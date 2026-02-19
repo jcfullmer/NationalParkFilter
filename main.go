@@ -25,20 +25,24 @@ func main() {
 	if dbURL == "" {
 		log.Fatal("DB_URL environment variable is not set.")
 	}
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Fatal("PORT environment variable is not set.")
+	}
 	db, err := ConnectToDBAndGetQuery(dbURL)
 	if err != nil {
 		log.Fatalf("Error connecting to database: %v", err)
 	}
 	conf := Config{
 		db:   db,
-		Port: ":8080",
+		Port: port,
 	}
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./static/index.html")
 	})
-	mux.HandleFunc("GET  /park/", conf.HandlerGetParks)
+	mux.HandleFunc("GET  /park", conf.HandlerGetParks)
 	mux.HandleFunc("GET /park/state", conf.HandlerStateSearch)
 	log.Printf("Listening on port %s", conf.Port)
 	err = http.ListenAndServe(conf.Port, mux)
