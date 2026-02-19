@@ -33,8 +33,10 @@ func main() {
 	}
 	mux := http.NewServeMux()
 
-	mux.Handle("GET /static", http.StripPrefix("/static", http.FileServer(http.Dir("./static"))))
-	mux.HandleFunc("GET  /park", conf.HandlerGetParks)
+	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/index.html")
+	})
+	mux.HandleFunc("GET  /park/", conf.HandlerGetParks)
 	mux.HandleFunc("GET /park/state", conf.HandlerStateSearch)
 	log.Printf("Listening on port %s", conf.Port)
 	err = http.ListenAndServe(conf.Port, mux)

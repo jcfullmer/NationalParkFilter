@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPS Park Explorer</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; }
+        .search-container { background: #f4f4f4; padding: 20px; border-radius: 8px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 8px 20px; background-color: #2e7d32; color: white; border: none; border-radius: 4px; cursor: pointer; height: 36px; }
+        button:hover { background-color: #1b5e20; }
+        .park-card { border: 1px solid #eee; padding: 1rem; margin-top: 1rem; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        .park-card:hover { transform: translateY(-2px); border-color: #2e7d32; }
+        .badge { background: #e8f5e9; color: #2e7d32; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
+        #results-info { margin-top: 20px; color: #666; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <h1>🌲 NPS Park Explorer</h1>
+    
+    <div class="search-container">
+        <div class="input-group">
+            <label for="stateInput">State Code</label>
+            <input type="text" id="stateInput" placeholder="e.g. CA" maxlength="2" style="width: 80px;">
+        </div>
+        
+        <div class="input-group">
+            <label for="limitInput">Limit</label>
+            <input type="number" id="limitInput" placeholder="Default: 50" min="1" max="500" style="width: 100px;">
+        </div>
+
+        <button onclick="fetchParks()">Search Parks</button>
+    </div>
+
+    <div id="results-info"></div>
+    <div id="results"></div>
+
+    <script>
+        async function fetchParks() {
+            const state = document.getElementById('stateInput').value.trim().toUpperCase();
+            const limit = document.getElementById('limitInput').value.trim();
+            const resultsDiv = document.getElementById('results');
+            const infoDiv = document.getElementById('results-info');
+            let url = state ? `/park/state?state_code=${state}` : `/park/`;
+            if (limit) {
+                const separator = url.includes('?') ? '&' : '?';
+                url += `${separator}limit=${limit}`;
+            }
+
+            resultsDiv.innerHTML = "Fetching parks...";
+            infoDiv.innerHTML = "";
+
+            try {
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const parks = await response.json();
+
+                if (!parks || parks.length === 0) {
+                    resultsDiv.innerHTML = "No parks found.";
+                    return;
+                }
+
+                infoDiv.innerHTML = `Showing ${parks.length} results from <code>${url}</code>`;
+                
+                resultsDiv.innerHTML = parks.map(park => `
+                    <div class="park-card">
+                        <span class="badge">${park.StateCode || 'Multi-State'}</span>
+                        <h3>${park.FullName}</h3>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                resultsDiv.innerHTML = `<p style="color:red"><b>Error:</b> ${err.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
